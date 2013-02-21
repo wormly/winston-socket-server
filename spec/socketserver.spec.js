@@ -54,17 +54,21 @@ describe('socket server', function() {
 		net.createServer.mostRecentCall.args[0](socket2);
 
 		var loggedCb = jasmine.createSpy();
+		var emittedCb = jasmine.createSpy();
 		server.log('debug', 'message', {a: 123}, loggedCb);
+		server.on('logged', emittedCb);
 
 		expect(socket1.write.mostRecentCall.args[0]).toEqual('debug: message. { a: 123 }\n');
 		expect(socket2.write.mostRecentCall.args[0]).toEqual('debug: message. { a: 123 }\n');
 
+		expect(emittedCb).not.toHaveBeenCalled();
 		expect(loggedCb).not.toHaveBeenCalled();
 
 		socket1.write.mostRecentCall.args[2]();
 		socket2.write.mostRecentCall.args[2]();
 
 		expect(loggedCb).toHaveBeenCalled();
+		expect(emittedCb).toHaveBeenCalled();
 
 		socket1.emit('error', 123);
 		socket1.emit('close');
