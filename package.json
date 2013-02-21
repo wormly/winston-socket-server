@@ -1,0 +1,30 @@
+{
+	"name": "winston-socket-server",
+	"version": "0.0.0",
+	"description": "Winston transport writing log entries to all the clients connected on UNIX socket",
+	"main": "./lib/socketserver",
+	"scripts": {
+		"test": "./node_modules/jasmine-node/bin/jasmine-node spec/"
+	},
+	"keywords": [
+		"winston",
+		"logging",
+		"unix",
+		"socket",
+		"transport"
+	],
+	"author": "Rodion Vynnychenko <roddiku@gmail.com>",
+	"license": "MIT",
+	"bundledDependencies": ["async", "winston"],
+	"dependencies": {
+		"async": "0.2.5",
+		"winston": "*"
+	},
+	"devDependencies": {
+		"jasmine-node": ""
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/wormly/winston-socket-server.git"
+	}
+}
