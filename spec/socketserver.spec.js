@@ -73,9 +73,14 @@ describe('socket server', function() {
 		socket1.emit('error', 123);
 		socket1.emit('close');
 
-		server.log('debug', 'message 2', {a: 123}, loggedCb);
+		server.log('debug', 'message 2', { 'window starts':
+			[ '1361527710',
+				'1361527720',
+				'1361527730',
+				'1361527740'] }, loggedCb);
 
-		expect(socket2.write.mostRecentCall.args[0]).toEqual('debug: message 2. { a: 123 }\n');
+		var expected = "debug: message 2. { 'window starts':  [ '1361527710', '1361527720', '1361527730', '1361527740', [length]: 4 ] }\n";
+		expect(socket2.write.mostRecentCall.args[0]).toEqual(expected);
 
 		expect(socket1.write.callCount).toEqual(1);
 
