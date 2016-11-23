@@ -44,6 +44,38 @@ describe('socket server', function() {
 		expect(net.createServer).toHaveBeenCalled();
 	});
 
+	it('supports other types of socket servers', function() {
+		var tcpSocketConfig = {
+			host: 'localhost',
+			port: 80
+		};
+
+		net = stub('connect', 'createServer');
+		fs = stub('unlink');
+
+		netSocket = stub(true);
+		netServer = stub('listen');
+
+		net.createServer.andReturn(netServer);
+		net.connect.andReturn(netSocket);
+
+		server = new SocketServer({
+			level: level,
+			listen: tcpSocketConfig,
+			net: net,
+			fs: fs
+		});
+
+		expect(net.connect.mostRecentCall.args[0]).toEqual(tcpSocketConfig);
+		net.connect.mostRecentCall.args[1]();
+
+		expect(net.createServer).toHaveBeenCalled();
+		expect(netServer.listen).toHaveBeenCalledWith(tcpSocketConfig);
+
+		netSocket.emit('error', 123);
+		expect(fs.unlink).not.toHaveBeenCalled();
+	});
+
 	it('logs to sockets', function() {
 		net.connect.mostRecentCall.args[1]();
 
@@ -85,6 +117,54 @@ describe('socket server', function() {
 		expect(socket1.write.callCount).toEqual(1);
 
 		socket2.write.mostRecentCall.args[2]();
+		expect(loggedCb.callCount).toEqual(2);
+	});
+
+	it('logs with timestamp', function() {
+		net = stub('connect', 'createServer');
+		fs = stub('unlink');
+
+		netSocket = stub(true);
+		netServer = stub('listen');
+
+		net.createServer.andReturn(netServer);
+		net.connect.andReturn(netSocket);
+
+		server = new SocketServer({
+			level: level,
+			path: path,
+			timestamp: true,
+			net: net,
+			fs: fs
+		});
+
+		net.connect.mostRecentCall.args[1]();
+
+		var socket = stub(true, 'write');
+
+		net.createServer.mostRecentCall.args[0](socket);
+
+		var loggedCb = jasmine.createSpy();
+		var emittedCb = jasmine.createSpy();
+		server.log('debug', 'message', {a: 123}, loggedCb);
+		server.on('logged', emittedCb);
+
+		var now = new Date().toISOString();
+
+		expect(emittedCb).not.toHaveBeenCalled();
+		expect(loggedCb).not.toHaveBeenCalled();
+
+		socket.write.mostRecentCall.args[2]();
+
+		expect(loggedCb).toHaveBeenCalled();
+		expect(emittedCb).toHaveBeenCalled();
+
+		server.log('debug', 'message 2', {}, loggedCb);
+
+		var expected = now + " debug: message 2. {}\n";
+		expect(socket.write.mostRecentCall.args[0]).toEqual(expected);
+
+		socket.write.mostRecentCall.args[2]();
 		expect(loggedCb.callCount).toEqual(2);
 	});
 });
