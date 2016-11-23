@@ -1,6 +1,6 @@
 {
 	"name": "winston-socket-server",
-	"version": "0.0.3",
+	"version": "0.0.4",
 	"description": "Winston transport writing log entries to all the clients connected on UNIX socket",
 	"main": "./lib/socketserver",
 	"scripts": {
